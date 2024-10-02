@@ -1,4 +1,4 @@
-# proyecto_SistemaVentas
+# proyecto_SistemaCitas
 
 Universidad Nacional Del Nordeste
 Facultad de Ciencias Exactas y Naturales y Agrimensura
