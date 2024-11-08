@@ -77,15 +77,114 @@ b. Herramientas (Instrumentos y procedimientos)
 
 CAPÍTULO IV: DESARROLLO DE LOS TEMAS
 
-1. Procedimientos y funciones almacenadas
-2. Manejo de permisos a nivel de usuarios de base de datos
-3. Optimización de consultas a través de índices
-4. Manejo de transacciones y transacciones anidadas
+PROCEDIMIENTOS Y FUNCIONES ALMACENADAS
+
+
+   
+MANEJO DE PERMISOS A NIVEL USUARIO EN UNA BASE DE DATOS
+
+¿Qué son los permisos?
+
+Los permisos de base de datos son derechos de acceso y privilegios otorgados a usuarios o roles dentro de una base de datos o plataforma de datos. Nos ayudan a especificar qué acciones pueden realizar los usuarios o roles en varios objetos de la base de datos, como tablas, vistas, esquemas o incluso la base de datos completa.
+
+La existencia de estos tiene una razón de ser y una forma especifica en la cual los podemos implementar, por lo tanto, resulta importante repasar brevemente dichos puntos.
+
+¿Por qué es necesario implementarlos?
+
+•	Son esenciales para la seguridad y el control del acceso a los datos.
+•	Garantizan que sólo los usuarios autorizados puedan realizar acciones específicas.
+•	Ayudan a mantener la integridad de los datos, evitar cambios no autorizados y limitar la exposición a datos confidenciales.
+
+¿Cómo los implementamos?
+
+•	Mediante declaraciones SQL o a través de la interfaz del sistema de base de datos.
+•	Asignar permisos a usuarios individuales o roles (grupos de usuarios) según sus responsabilidades. 
+•	A los usuarios se les deben asignar permisos que garanticen que tienen el acceso necesario para realizar sus tareas sin exceder sus privilegios.
+
+¿Qué son los privilegios?
+
+Son los permisos específicos que determinan qué acciones puede realizar un usuario en la base de datos, como SELECT, INSERT, UPDATE y DELETE. Estos privilegios controlan el acceso y modificación de datos en las tablas.
+
+¿Cuáles son los niveles de acceso?
+
+En la tabla siguiente se muestran los roles fijos de base de datos y sus funcionalidades. Estos roles existen en todas las bases de datos. A excepción del rol de base de datos público, no se pueden cambiar los permisos asignados a los roles fijos de base de datos.
+
+Ver tabla adjuntada: 
+![tabla-permisos-roles](https://github.com/user-attachments/assets/7ce5df2e-d779-4e25-b728-69edb9d1a346)
+
+
+Modelos comunes de permisos
+
+Los modelos de permisos de base de datos son los que permiten a los usuarios acceder a los objetos de una base de datos y realizar acciones concretas en ella.
+
+1. Modelo Basado en Roles (Role Based Access Control)
+   
+Es un método para restringir el acceso a la red basado en los roles de usuarios individuales. Este método permite acceder a lis empleados únicamente a la información que necesitan para llevar adelante su trabajo. En este modelo, los roles están basados en varios factores, incluyendo autorizaciones, responsabilidades y competencia laboral. Permite a los negocios especificar si los individuos son usuarios finales, administradores o expertos. Su importancia yace en el hecho de que posee utilidad especialmente para organizaciones con una gran cantidad de empleados y aquellas que brindan acceso a terceros como clientes y proveedores, brindando así una mejor protección a la información sensible y las aplicaciones.
+
+Ejemplo Práctico: Sistema de Gestión de una Clínica
+
+Roles definidos:
+o	Médico: Acceso para ver y actualizar historias clínicas de sus pacientes.
+o	Recepcionista: Acceso para gestionar citas (crear, cancelar, modificar).
+o	Gestor de Clínica: Acceso para generar reportes de citas y estadísticas.
+
+Configuración: 
+o	El usuario Dr. Fontana es asignado al rol de Médico y, por lo tanto, puede acceder a las historias clínicas y actualizar información.
+o	El usuario María López es asignado al rol de Recepcionista y solo puede gestionar citas sin acceso a historias clínicas.
+o	El usuario Juan Pérez es un Gestor de Clínica y tiene permisos para ver reportes y estadísticas, pero no modificar historias clínicas.
+
+
+
+2. Modelos Basado en Atributos (Attribute Based Access Control)
+   
+Es un modelo de control de acceso en el cual los derechos de acceso son otorgados basado en los atributos. Estos pueden estar asociados con usuarios, recursos, acciones y el ambiente. A diferencia de modelos de control de acceso tradicionales, ABAC provee un enfoque altamente flexible y granular a la gestión de acceso.
+En dicho modelo, debemos describir las políticas usando varios tipos de condiciones, incluyendo condiciones booleanas, condiciones basadas en texto/objetos y comparaciones numéricas. Estas reglas determinan si un usuario puede acceder a un cierto recurso basado en atributos. En ABAC, los permisos se basan en una combinación de atributos de usuario, recurso, y entorno. Esto proporciona un control más granular y flexible.
+
+Ejemplo Práctico: Plataforma de Streaming de Video
+
+Atributos de usuario:
+o	Edad: 16 años, 30 años, etc.
+o	País: Argentina, España, México, etc.
+o	Suscripción: Premium, Estándar, Básico.
+
+Atributos del recurso:
+o	Clasificación por edad: +18, +13, Todo público.
+o	Región de disponibilidad: Latinoamérica, Europa, etc.
+
+Reglas de acceso:
+o	Los usuarios menores de 18 años no pueden acceder a contenido con clasificación +18.
+o	Los usuarios con suscripción Estándar solo pueden ver contenido en calidad HD, mientras que los de suscripción Premium pueden ver contenido en calidad 4K.
+o	Los usuarios en la región Latinoamérica solo pueden ver contenido disponible en esa región.
+
+Configuración de acceso:
+o	El usuario Carlos Sánchez (edad 17, país México, suscripción Estándar) puede acceder a contenido +13 y Todo público y ver contenido disponible en Latinoamérica en calidad HD.
+o	El usuario Ana Gómez (edad 25, país España, suscripción Premium) puede acceder a cualquier contenido y en calidad 4K.
+
+
+
+Buenas Prácticas
+
+1. Principio de Menor Privilegio
+   
+El principio de menor privilegio dicta que a los usuarios solo se les deben otorgar los permisos necesarios para realizar sus tareas y nada más. Esto minimiza los riesgos de accesos indebidos y potenciales daños en caso de que una cuenta sea comprometida.
+
+2. Revisión Regular de Permisos
+   
+La revisión periódica de permisos es crucial para asegurar que los accesos concedidos siguen siendo relevantes y necesarios. Los permisos asignados inicialmente pueden volverse obsoletos con cambios de roles, tareas o salidas de empleados.
+
+3. Auditoría y Monitoreo de Permisos
+
+La auditoría y monitoreo de permisos implica registrar y rastrear los cambios en los permisos para identificar y responder rápidamente a comportamientos inusuales o no autorizados.
+
+
+OPTIMIZACION DE CONSULTAS A TRAVES DE INDICES
+MANEJO DE TRANSACCIONES Y TRANSACCIONES ANIDADAS
 
 
 CAPÍTULO V: CONCLUSIONES
 
 El desarrollo del sistema de gestión de citas médicas ha abordado con éxito los problemas de organización y acceso a la información en clínicas. Este trabajo ha permitido optimizar el flujo de trabajo y mejorar la experiencia tanto de los administradores como de los pacientes.
+
 
 Los resultados más destacados incluyen:
 
@@ -96,3 +195,18 @@ Los resultados más destacados incluyen:
     -Satisfacción del Usuario: Las encuestas indican que tanto el personal administrativo como los médicos están satisfechos con la facilidad de uso del sistema, lo que se traduce en una    mejor atención al paciente.
 
     -Desarrollo de Habilidades: Este proyecto ha permitido adquirir y fortalecer habilidades en programación y diseño de bases de datos, fundamentales para futuras aplicaciones profesionales.
+
+BIBLIOGRAFÍA
+
+1. Procedimientos y funciones almacenadas
+   
+3. Manejo de Permisos a Nivel Usuario en una Base de Datos
+
+https://docs.aws.amazon.com/es_es/redshift/latest/dg/r_Privileges.html
+
+https://help.sap.com/docs/SAP_POWERDESIGNER/1f914d86319d43b7b2402532666583c0/8a0a8c9fc9eb4fab9d90f5784dc857db.html?locale=es-ES
+
+https://learn.microsoft.com/es-es/sql/relational-databases/security/authentication-access/database-level-roles?view=sql-server-ver16
+
+4. Optimización de consultas a través de índices
+5. Manejo de transacciones y transacciones anidadas
