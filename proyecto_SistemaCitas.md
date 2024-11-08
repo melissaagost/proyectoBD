@@ -127,6 +127,26 @@ Las funciones con valores de tabla definidas por el usuario (TVF) devuelven un t
 • Funciones del sistema
 SQL Server proporciona numerosas funciones del sistema que se pueden usar para realizar diversas operaciones. No se pueden modificar.
 
+Diferencias entre procedimientos almacenados y funciones almacenadas:
+
+1. Propósito Principal
+   •Procedimiento Almacenado: Se utiliza principalmente para ejecutar tareas complejas y operaciones que pueden incluir la modificación de datos, como INSERT, UPDATE, o DELETE. Son muy útiles para realizar múltiples operaciones a la vez, dado que pueden contener lógica de control (bucles, condiciones) y gestionar transacciones.
+   •Función Almacenada: Su propósito principal es calcular un valor y devolverlo. Esto puede ser un único valor (funciones escalares) o un conjunto de filas (funciones de tabla). Las funciones se utilizan típicamente para operaciones que requieren ser reutilizadas dentro de consultas, como cálculos o transformaciones.
+
+2. Modificación de Datos: ambos tipos pueden modificar datos, pero hay diferencias importantes
+   •Procedimiento Almacenado: Tiene la capacidad de modificar directamente tablas en la base de datos sin restricciones, lo que lo hace ideal para operaciones CRUD (Crear, Leer, Actualizar, Eliminar).
+   •Función Almacenada: Aunque puede realizar operaciones como INSERT, UPDATE o DELETE en tablas temporales o variables de tabla, no es recomendable que modifique tablas persistentes directamente. Esto se debe a que las funciones están diseñadas para ser determinísticas y predecibles, lo que significa que, al ser llamadas dentro de una consulta, siempre deberían devolver el mismo resultado para los mismos parámetros, sin efectos secundarios en la base de datos. Modificar tablas desde una función puede llevar a comportamientos inesperados y dificultar el mantenimiento del sistema.
+
+3. Uso en Consultas
+   •Procedimientos Almacenados: No se pueden usar dentro de un SELECT, ya que no devuelven un valor directamente como una función. Sin embargo, pueden devolver múltiples valores a través de parámetros de salida o conjuntos de resultados (SELECT dentro del procedimiento).
+   •Funciones Almacenadas: Se pueden utilizar directamente en una cláusula SELECT, ya que siempre devuelven un valor. Esto las hace convenientes para tareas repetitivas y cálculos complejos dentro de consultas.
+
+4. Manejo de Transacciones
+   •Procedimiento Almacenado: Puede gestionar transacciones explícitamente (BEGIN TRANSACTION, COMMIT, ROLLBACK), lo que es crucial para asegurar la integridad de los datos en operaciones complejas.
+   •Función Almacenada: No puede gestionar transacciones de forma explícita, ya que están pensadas para ser funciones determinísticas que no afectan el estado general de la base de datos.
+
+En la siguiente tabla se reflejan las diferencias de manera resumida
+
 MANEJO DE PERMISOS A NIVEL USUARIO EN UNA BASE DE DATOS
 
 ¿Qué son los permisos?
