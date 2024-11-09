@@ -238,6 +238,29 @@ La revisión periódica de permisos es crucial para asegurar que los accesos con
 La auditoría y monitoreo de permisos implica registrar y rastrear los cambios en los permisos para identificar y responder rápidamente a comportamientos inusuales o no autorizados.
 
 OPTIMIZACION DE CONSULTAS A TRAVES DE INDICES
+
+Los índices son estructuras de datos que mejoran la velocidad de recuperación de datos en una base de datos. Se utilizan principalmente para optimizar las consultas SELECT y, en algunos casos, también pueden ayudar en las operaciones de ordenación (ORDER BY), búsquedas (WHERE) y uniones (JOIN). Sin índices, las bases de datos tendrían que buscar fila por fila de una tabla para encontrar los datos solicitados, lo que sería extremadamente ineficiente en tablas grandes.
+
+Los índices permiten a los motores de bases de datos acceder a las filas de manera mucho más rápida, reduciendo el tiempo de búsqueda de O(n) (búsqueda lineal) a O(log n) (búsqueda binaria) en la mayoría de los casos.
+
+Existen dos tipos principales de índices más utilizados:
+
+Índice Agrupado (Clustered Index)
+
+El índice agrupado organiza los datos de la tabla físicamente en el disco según el orden del índice. Es decir, los registros de la tabla están almacenados en el disco en el mismo orden que el índice, por lo que si tienes un índice agrupado sobre una columna, las filas de la tabla estarán ordenadas según los valores de esa columna. Solo puede haber un índice agrupado por tabla, ya que los datos solo pueden estar ordenados de una forma.
+Este tipo es muy eficiente para consultas que acceden a rangos de datos, ya que estos estarán físicamente contiguos. También mejora significativamente el rendimiento en consultas de búsquedas en rangos (BETWEEN, >=, <).
+
+Índice No Agrupado (Non-Clustered Index)
+
+A diferencia del índice agrupado, un índice no agrupado no cambia el orden físico de los datos en la tabla. En su lugar, crea una estructura separada (árbol B) que contiene una lista de las claves de índice y las direcciones físicas (punteros) donde se encuentran los registros correspondientes, por lo tanto son una estructura separada que apunta a las filas de la tabla. Gracias a esta característica se puede tener múltiples índices no agrupados en una tabla, permitiendo que diferentes columnas se optimicen para diferentes tipos de consultas.
+Los índices no agrupados son ideales para consultas que no necesitan acceder a rangos de datos contiguos y buscan valores específicos en una columna, ofreciendo gran flexibilidad para mejorar el rendimiento de una variedad de consultas.
+
+En general, el índice agrupado es adecuado para columnas que son únicas o ordenadas, como las claves primarias, mientras que los índices no agrupados son más flexibles y pueden ser usados en múltiples columnas para optimizar diversas consultas.
+A la hora de elegir qué tipo de optimización por índices utilizar hay que tener en cuenta que si se busca optimizar la búsqueda o el acceso a un rango de datos ordenados, el índice agrupado es la mejor opción.
+Si tienes varias consultas que acceden a diferentes columnas sin un orden fijo, los índices no agrupados son más apropiados.
+
+Para demostrar las ventajas de cada tipo de optimización empezaremos por insertar un lote de datos masivos de 1 millón de citas médicas en la tabla Cita, utilizando un script que genera datos aleatorios dentro de un rango. Por ejemplo, para las fechas lo manejamos con un rango de 10 años desde 2015. 
+
 MANEJO DE TRANSACCIONES Y TRANSACCIONES ANIDADAS
 
 CAPÍTULO V: CONCLUSIONES
