@@ -33,13 +33,11 @@ BEGIN
         PRINT 'Cita registrada exitosamente.';
     END TRY
     BEGIN CATCH
-        -- Si ocurre algún error, revertir la transacción
         IF @@TRANCOUNT > 0
         BEGIN
             ROLLBACK TRANSACTION;
         END;
 
-        -- Capturar y mostrar el error
         DECLARE @ErrorMessage NVARCHAR(4000);
         DECLARE @ErrorSeverity INT;
         DECLARE @ErrorState INT;
@@ -70,3 +68,163 @@ EXEC spRegistrarCita
 
 --Selecciono la tabla para corroborar datos cargados
 select * from Cita
+
+
+--Procedimiento para agregar un paciente
+go
+CREATE PROCEDURE spRegistrarPaciente
+    @NroDocumento VARCHAR(20),
+    @Nombre VARCHAR(50),
+    @Apellido VARCHAR(50),
+    @FechaNacimiento DATE,
+    @Correo VARCHAR(100),
+    @Telefono VARCHAR(20),
+    @IdDireccion INT,
+    @ObraSocial VARCHAR(50)
+AS
+BEGIN
+    BEGIN TRANSACTION;
+
+    BEGIN TRY
+        -- Calcular la edad a partir de la fecha de nacimiento
+        DECLARE @Edad INT;
+        SET @Edad = DATEDIFF(YEAR, @FechaNacimiento, GETDATE());
+
+        -- Ajustar la edad si el cumpleaños aún no ha ocurrido este año
+        IF (DATEADD(YEAR, @Edad, @FechaNacimiento) > GETDATE())
+        BEGIN
+            SET @Edad = @Edad - 1;
+        END;
+
+        -- Verifica si existe persona con el mismo Documento
+        IF EXISTS (SELECT 1 FROM Persona WHERE NroDocumento = @NroDocumento)
+        BEGIN
+            RAISERROR ('Error: Ya existe una persona con el mismo número de documento.', 16, 1);
+            ROLLBACK TRANSACTION;
+            RETURN;
+        END;
+
+        -- Insertar Persona
+        INSERT INTO Persona (NroDocumento, Nombre, Apellido, FechaNacimiento, Correo, Telefono, IdDireccion, Edad)
+        VALUES (@NroDocumento, @Nombre, @Apellido, @FechaNacimiento, @Correo, @Telefono, @IdDireccion, @Edad);
+
+        -- Verificar si se insertó correctamente
+        IF @@ROWCOUNT = 0
+        BEGIN
+            RAISERROR ('Error: No se pudo insertar la persona.', 16, 1);
+            ROLLBACK TRANSACTION;
+            RETURN;
+        END;
+
+        -- Insertar Paciente
+        INSERT INTO Paciente (NroDocumento, ObraSocial)
+        VALUES (@NroDocumento, @ObraSocial);
+
+        COMMIT TRANSACTION;
+
+        PRINT 'Paciente registrado exitosamente.';
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0
+        BEGIN
+            ROLLBACK TRANSACTION;
+        END;
+
+        DECLARE @ErrorMessage NVARCHAR(4000);
+        DECLARE @ErrorSeverity INT;
+        DECLARE @ErrorState INT;
+
+        SELECT 
+            @ErrorMessage = ERROR_MESSAGE(),
+            @ErrorSeverity = ERROR_SEVERITY(),
+            @ErrorState = ERROR_STATE();
+
+        RAISERROR (@ErrorMessage, @ErrorSeverity, @ErrorState);
+    END CATCH
+END;
+GO
+
+--ejemplo de insertar paciente con dni existente
+EXEC spRegistrarPaciente 
+    @NroDocumento = '87654321',
+    @Nombre = 'Carlos',
+    @Apellido = 'Perez',
+    @FechaNacimiento = '1985-05-10',
+    @Correo = 'carlos.perez@example.com',
+    @Telefono = '123456789',
+    @IdDireccion = 1,
+    @ObraSocial = 'Swiss Medical';
+
+--ejemplo de insertar paciente nuevo 
+EXEC spRegistrarPaciente 
+    @NroDocumento = '43532954',
+    @Nombre = 'Carlos',
+    @Apellido = 'Perez',
+    @FechaNacimiento = '1985-05-10',
+    @Correo = 'carlos.perez@example.com',
+    @Telefono = '123456789',
+    @IdDireccion = 1,
+    @ObraSocial = 'Swiss Medical';
+
+--Registrar un tratamiento
+go
+CREATE PROCEDURE spRegistrarTratamiento
+    @Nombre VARCHAR(100),
+    @Descripcion VARCHAR(255) = NULL,
+    @Id_Droga INT
+AS
+BEGIN
+    BEGIN TRANSACTION;
+
+    BEGIN TRY
+        -- Verificar si la droga con el Id_Droga especificado existe
+        IF NOT EXISTS (SELECT 1 FROM Droga WHERE Id_Droga = @Id_Droga)
+        BEGIN
+            RAISERROR ('Error: La droga especificada no existe.', 16, 1);
+            ROLLBACK TRANSACTION;
+            RETURN;
+        END;
+
+        -- Insertar tratamiento
+        INSERT INTO Tratamiento (Nombre, Descripcion, Id_Droga)
+        VALUES (@Nombre, @Descripcion, @Id_Droga);
+
+        -- Confirmar la transacción si la inserción fue exitosa
+        COMMIT TRANSACTION;
+
+        PRINT 'Tratamiento registrado exitosamente.';
+    END TRY
+    BEGIN CATCH
+        
+        IF @@TRANCOUNT > 0
+        BEGIN
+            ROLLBACK TRANSACTION;
+        END;
+
+        
+        DECLARE @ErrorMessage NVARCHAR(4000);
+        DECLARE @ErrorSeverity INT;
+        DECLARE @ErrorState INT;
+
+        SELECT 
+            @ErrorMessage = ERROR_MESSAGE(),
+            @ErrorSeverity = ERROR_SEVERITY(),
+            @ErrorState = ERROR_STATE();
+
+        RAISERROR (@ErrorMessage, @ErrorSeverity, @ErrorState);
+    END CATCH
+END;
+GO
+
+-- Registrar un nuevo tratamiento para una droga existente
+EXEC spRegistrarTratamiento 
+    @Nombre = 'Tratamiento de Hipertensión',
+    @Descripcion = 'Tratamiento basado en el uso de bloqueadores de canales de calcio',
+    @Id_Droga = 5;
+
+--Registrar con droga inexistente
+EXEC spRegistrarTratamiento 
+    @Nombre = 'Tratamiento de Hipertensión',
+    @Descripcion = 'Tratamiento basado en el uso de bloqueadores de canales de calcio',
+    @Id_Droga = 6;
+
