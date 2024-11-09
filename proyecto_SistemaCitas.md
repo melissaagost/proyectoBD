@@ -146,6 +146,8 @@ Diferencias entre procedimientos almacenados y funciones almacenadas:
    •Función Almacenada: No puede gestionar transacciones de forma explícita, ya que están pensadas para ser funciones determinísticas que no afectan el estado general de la base de datos.
 
 En la siguiente tabla se reflejan las diferencias de manera resumida
+![tabla](https://github.com/user-attachments/assets/55c22f96-b541-44a2-9a05-243bdf20758f)
+
 
 MANEJO DE PERMISOS A NIVEL USUARIO EN UNA BASE DE DATOS
 
