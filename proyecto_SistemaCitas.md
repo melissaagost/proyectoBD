@@ -239,27 +239,47 @@ La auditoría y monitoreo de permisos implica registrar y rastrear los cambios e
 
 OPTIMIZACION DE CONSULTAS A TRAVES DE INDICES
 
-Los índices son estructuras de datos que mejoran la velocidad de recuperación de datos en una base de datos. Se utilizan principalmente para optimizar las consultas SELECT y, en algunos casos, también pueden ayudar en las operaciones de ordenación (ORDER BY), búsquedas (WHERE) y uniones (JOIN). Sin índices, las bases de datos tendrían que buscar fila por fila de una tabla para encontrar los datos solicitados, lo que sería extremadamente ineficiente en tablas grandes.
+Los índices son estructuras de datos auxiliares que aceleran significativamente la recuperación de datos en bases de datos relacionales. Al crear una estructura ordenada sobre una o más columnas de una tabla, los índices permiten a los motores de bases de datos localizar rápidamente los registros que cumplen con una determinada condición, evitando así un escaneo secuencial completo de la tabla. A continuacion veremos los diferentes tipos de índices, su impacto en el rendimiento de las consultas y los factores a considerar al diseñar una estrategia de indexación efectiva.
 
-Los índices permiten a los motores de bases de datos acceder a las filas de manera mucho más rápida, reduciendo el tiempo de búsqueda de O(n) (búsqueda lineal) a O(log n) (búsqueda binaria) en la mayoría de los casos.
+Tipos de Índices
 
-Existen dos tipos principales de índices más utilizados:
+Índice Agrupado (Clustered Index): Organiza físicamente los datos de la tabla según el orden del índice. Solo puede existir un índice agrupado por tabla y suele coincidir con la clave primaria. Es ideal para consultas que acceden a rangos de datos o que utilizan el orden natural de los datos.
 
-Índice Agrupado (Clustered Index)
+Índice No Agrupado (Non-Clustered Index): Crea una estructura separada que apunta a las filas de la tabla, sin alterar el orden físico de los datos. Permite múltiples índices por tabla y es útil para consultas que buscan valores específicos o combinaciones de columnas.
 
-El índice agrupado organiza los datos de la tabla físicamente en el disco según el orden del índice. Es decir, los registros de la tabla están almacenados en el disco en el mismo orden que el índice, por lo que si tienes un índice agrupado sobre una columna, las filas de la tabla estarán ordenadas según los valores de esa columna. Solo puede haber un índice agrupado por tabla, ya que los datos solo pueden estar ordenados de una forma.
-Este tipo es muy eficiente para consultas que acceden a rangos de datos, ya que estos estarán físicamente contiguos. También mejora significativamente el rendimiento en consultas de búsquedas en rangos (BETWEEN, >=, <).
+Índices únicos: Garantizan la unicidad de los valores en una columna.
+Índices filtrados: Crean índices sobre un subconjunto de filas que cumplen una determinada condición.
+Índices espaciales: Optimizados para datos geográficos.
 
-Índice No Agrupado (Non-Clustered Index)
+Costo de los Índices
 
-A diferencia del índice agrupado, un índice no agrupado no cambia el orden físico de los datos en la tabla. En su lugar, crea una estructura separada (árbol B) que contiene una lista de las claves de índice y las direcciones físicas (punteros) donde se encuentran los registros correspondientes, por lo tanto son una estructura separada que apunta a las filas de la tabla. Gracias a esta característica se puede tener múltiples índices no agrupados en una tabla, permitiendo que diferentes columnas se optimicen para diferentes tipos de consultas.
-Los índices no agrupados son ideales para consultas que no necesitan acceder a rangos de datos contiguos y buscan valores específicos en una columna, ofreciendo gran flexibilidad para mejorar el rendimiento de una variedad de consultas.
+La creación y el mantenimiento de índices implican un costo:
+Espacio en disco: Los índices ocupan espacio adicional en el disco, lo que puede afectar el rendimiento general de la base de datos, especialmente en sistemas con almacenamiento limitado.
 
-En general, el índice agrupado es adecuado para columnas que son únicas o ordenadas, como las claves primarias, mientras que los índices no agrupados son más flexibles y pueden ser usados en múltiples columnas para optimizar diversas consultas.
-A la hora de elegir qué tipo de optimización por índices utilizar hay que tener en cuenta que si se busca optimizar la búsqueda o el acceso a un rango de datos ordenados, el índice agrupado es la mejor opción.
-Si tienes varias consultas que acceden a diferentes columnas sin un orden fijo, los índices no agrupados son más apropiados.
+Rendimiento de las DML: Las operaciones de inserción, actualización y eliminación pueden verse afectadas por la presencia de índices, ya que el índice debe actualizarse para reflejar los cambios en los datos.
 
-Para demostrar las ventajas de cada tipo de optimización empezaremos por insertar un lote de datos masivos de 1 millón de citas médicas en la tabla Cita, utilizando un script que genera datos aleatorios dentro de un rango. Por ejemplo, para las fechas lo manejamos con un rango de 10 años desde 2015. 
+Cuándo Crear un Índice
+La decisión de crear un índice debe basarse en un análisis cuidadoso de las consultas más frecuentes y su patrón de acceso a los datos. Algunos factores clave a considerar son:
+Frecuencia de las consultas: Los índices son más beneficiosos para columnas que se utilizan con frecuencia en cláusulas WHERE, ORDER BY o GROUP BY.
+Selectividad: La selectividad de una columna se refiere a la proporción de filas únicas en esa columna. Una alta selectividad indica que el índice será más efectivo.
+Cardinalidad: La cardinalidad de una columna es el número de valores únicos. Una alta cardinalidad suele ser deseable para los índices.
+
+Optimización de Consultas con Índices
+
+Estadísticas: Las estadísticas de la base de datos proporcionan información al optimizador de consultas sobre la distribución de los datos en las tablas y los índices. Es fundamental mantener las estadísticas actualizadas para garantizar que el optimizador tome decisiones correctas.
+
+Planificación de ejecución: El plan de ejecución visualiza la estrategia que el motor de base de datos utilizará para ejecutar una consulta. Analizar el plan de ejecución puede ayudar a identificar oportunidades de mejora y a ajustar los índices si es necesario.
+
+Métricas de Rendimiento
+Para evaluar el impacto de los índices en el rendimiento de las consultas, es importante medir las siguientes métricas:
+IOs: Número de operaciones de entrada/salida.
+CPU: Uso de la CPU.
+Latencia: Tiempo de respuesta de las consultas.
+Escalabilidad: Cómo se comporta el sistema a medida que aumenta el tamaño de la base de datos.
+
+Conclusiones
+
+Los índices son una herramienta fundamental para optimizar el rendimiento de las consultas en bases de datos relacionales. Sin embargo, su uso debe ser cuidadoso y estratégico. Al comprender los diferentes tipos de índices, sus costos y beneficios, y al aplicar las mejores prácticas de diseño, es posible crear una estrategia de indexación que maximice el rendimiento de la base de datos y satisfaga las necesidades de las aplicaciones.
 
 MANEJO DE TRANSACCIONES Y TRANSACCIONES ANIDADAS
 
@@ -350,7 +370,12 @@ https://help.sap.com/docs/SAP_POWERDESIGNER/1f914d86319d43b7b2402532666583c0/8a0
 
 https://learn.microsoft.com/es-es/sql/relational-databases/security/authentication-access/database-level-roles?view=sql-server-ver16
 
-4. Optimización de consultas a través de índices
-5. Manejo de transacciones y transacciones anidadas
+3. Optimización de consultas a través de índices
+
+https://learn.microsoft.com/es-es/sql/relational-databases/indexes/clustered-and-nonclustered-indexes-described?view=sql-server-ver16
+
+https://learn.microsoft.com/es-es/sql/relational-databases/indexes/create-clustered-indexes?view=sql-server-ver16
+
+4. Manejo de transacciones y transacciones anidadas
 https://learn.microsoft.com/es-es/sql/t-sql/language-elements/transactions-transact-sql?view=sql-server-ver16   
 https://www.sqlshack.com/es/leyendo-el-registro-de-transacciones-sql-server/
