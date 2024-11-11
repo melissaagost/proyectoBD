@@ -216,15 +216,95 @@ BEGIN
 END;
 GO
 
--- Registrar un nuevo tratamiento para una droga existente
+-- Registrar un nuevo tratamiento para una droga inexistente
 EXEC spRegistrarTratamiento 
     @Nombre = 'Tratamiento de Hipertensión',
     @Descripcion = 'Tratamiento basado en el uso de bloqueadores de canales de calcio',
-    @Id_Droga = 5;
+    @Id_Droga = 15;
 
---Registrar con droga inexistente
+--Registrar con droga existente
 EXEC spRegistrarTratamiento 
-    @Nombre = 'Tratamiento de Hipertensión',
-    @Descripcion = 'Tratamiento basado en el uso de bloqueadores de canales de calcio',
-    @Id_Droga = 6;
+    @Nombre = 'Tratamiento de alergia',
+    @Descripcion = 'Tratamiento basado en el uso de antialergico',
+    @Id_Droga = 7;
+
+	
+	INSERT INTO Droga (Nombre)
+	VALUES
+	('Sertal'),
+	('Dexalergin');
+
+	select * from Droga
+	-- Insertar Tratamientos 
+	INSERT INTO Tratamiento ( Nombre, Descripcion, Id_Droga)
+	VALUES
+	( 'Tratamiento de dolor', 'Tratamiento para aliviar el dolor de cabeza', 1)
+
+
+--Procedimiento almacenado para modificar tratamiento
+--Modificar un tratamiento
+GO
+CREATE PROCEDURE spModificarTratamiento
+    @Id_Tratamiento INT,
+    @Nombre VARCHAR(100),
+    @Descripcion VARCHAR(255) = NULL,
+    @Id_Droga INT
+AS
+BEGIN
+    BEGIN TRANSACTION;
+
+    BEGIN TRY
+        -- Verificar si el tratamiento con el Id_Tratamiento especificado existe
+        IF NOT EXISTS (SELECT 1 FROM Tratamiento WHERE Id_Tratamiento = @Id_Tratamiento)
+        BEGIN
+            RAISERROR ('Error: El tratamiento especificado no existe.', 16, 1);
+            ROLLBACK TRANSACTION;
+            RETURN;
+        END;
+
+        -- Verificar si la droga con el Id_Droga especificado existe
+        IF NOT EXISTS (SELECT 1 FROM Droga WHERE Id_Droga = @Id_Droga)
+        BEGIN
+            RAISERROR ('Error: La droga especificada no existe.', 16, 1);
+            ROLLBACK TRANSACTION;
+            RETURN;
+        END;
+
+        -- Actualizar tratamiento
+        UPDATE Tratamiento
+        SET Nombre = @Nombre,
+            Descripcion = @Descripcion,
+            Id_Droga = @Id_Droga
+        WHERE Id_Tratamiento = @Id_Tratamiento;
+
+        -- Confirmar la transacción si la actualización fue exitosa
+        COMMIT TRANSACTION;
+
+        PRINT 'Tratamiento modificado exitosamente.';
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0
+        BEGIN
+            ROLLBACK TRANSACTION;
+        END;
+
+        DECLARE @ErrorMessage NVARCHAR(4000);
+        DECLARE @ErrorSeverity INT;
+        DECLARE @ErrorState INT;
+
+        SELECT 
+            @ErrorMessage = ERROR_MESSAGE(),
+            @ErrorSeverity = ERROR_SEVERITY(),
+            @ErrorState = ERROR_STATE();
+
+        RAISERROR (@ErrorMessage, @ErrorSeverity, @ErrorState);
+    END CATCH
+END;
+GO
+-- Modificar un tratamiento existente (Id_Tratamiento = 1)
+EXEC spModificarTratamiento 
+    @Id_Tratamiento = 1, 
+    @Nombre = 'Tratamiento de Dolor Modificado', 
+    @Descripcion = 'Nuevo tratamiento para dolor de cabeza', 
+    @Id_Droga = 1;
 
