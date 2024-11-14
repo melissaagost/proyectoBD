@@ -51,7 +51,6 @@ BEGIN
     END CATCH
 END;
 GO
-
 --Prueba codigo con error. Paciente No existe
 EXEC spRegistrarCita 
     @Fecha = '2024-11-09 15:00:00', 
@@ -61,10 +60,10 @@ EXEC spRegistrarCita
 
 --Prueba codigo exitosa
 EXEC spRegistrarCita 
-    @Fecha = '2024-11-07 14:00:00', 
+    @Fecha = '2024-11-04 14:00:00', 
     @Motivo = 'Consulta general', 
     @NroMatricula = 3030, 
-    @NroPaciente = 2;
+    @NroPaciente = 4;
 
 --Selecciono la tabla para corroborar datos cargados
 select * from Cita
@@ -222,23 +221,25 @@ EXEC spRegistrarTratamiento
     @Descripcion = 'Tratamiento basado en el uso de bloqueadores de canales de calcio',
     @Id_Droga = 15;
 
+
+	select * from Tratamiento
 --Registrar con droga existente
 EXEC spRegistrarTratamiento 
-    @Nombre = 'Tratamiento de alergia',
-    @Descripcion = 'Tratamiento basado en el uso de antialergico',
-    @Id_Droga = 7;
+    @Nombre = 'Tratamiento para la diabetes',
+    @Descripcion = 'Tratamiento basado en el uso de antidiabetico para controlar azucar en sangre',
+    @Id_Droga = 9;
 
 	
 	INSERT INTO Droga (Nombre)
 	VALUES
-	('Sertal'),
-	('Dexalergin');
+	('Metformina')
 
 	select * from Droga
 	-- Insertar Tratamientos 
 	INSERT INTO Tratamiento ( Nombre, Descripcion, Id_Droga)
 	VALUES
-	( 'Tratamiento de dolor', 'Tratamiento para aliviar el dolor de cabeza', 1)
+	( 'Tratamiento para el asma', 'Tratamiento para reducir sintomas del asma', 8),
+	( 'Tratamiento para la hipertension', 'Tratamiento para bajar el nivel de presion en sangre', 8)
 
 
 --Procedimiento almacenado para modificar tratamiento
